@@ -1,0 +1,47 @@
+interface insertableProduct:
+  Insert(int, string)
+  
+class InsertProduct implements insertableProduct:
+  string url
+  HttpLib httpLib
+  insertProduct(string url):
+    this.url = url
+    this.httpLib = httpLib()
+  Insert(int id, string name):
+    this.httpLib.Post(this.url, { 'id' : id, 'name' : name})
+    
+  
+interface selectableProduct:
+  Select(int, int)
+  
+class SelectProduct implements selectableProduct:
+  MySQLConnection conn
+  SelectProduct(MySQLConnection connection):
+    this.conn = connection
+    
+  Select(int id, int size):
+    this.conn.prepareStatment("SELECT Product.id, Product.name FROM Product WHERE Product.id > ? LIMIT ?", (id, size))
+    QuerySet = this.conn.execute()
+    return response
+
+    
+class Process:
+  int chunkSize
+  Process(insertableProduct insert, selectableProduct select, int chunkSize)
+    this.insert = insert
+    this.select = select
+    this.chunkSize = chunkSize
+  Do():
+    int tmpId = 0
+    QuerySet tmpQuery = null;
+    do:
+      tmpQuery = this.select.Select(tmpId, this.chunkSize)
+      foreach tmpQuery as row:
+        this.insert.Insert(row['Product.id'], row['Product.name'])
+        tmpId = row['Product.id']
+
+         
+    
+    
+
+    
