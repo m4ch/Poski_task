@@ -1,21 +1,26 @@
 interface insertableProduct:
   Insert(int, string)
   
+// stara knihovna HttpLib pro python
+  
 class InsertProduct implements insertableProduct:
   string url
-  HttpLib httpLib
+
   insertProduct(string url):
     this.url = url
-    this.httpLib = httpLib()
+    
   Insert(int id, string name):
-    this.httpLib.Post(this.url, { 'id' : id, 'name' : name})
+    this.HttpLib.Post(this.url, { 'id' : id, 'name' : name})
     
   
 interface selectableProduct:
   Select(int, int)
   
+// Predpokladam, ze export bude z databaze, proto implementuji konkretni dotaz "SELECT
+  
 class SelectProduct implements selectableProduct:
   MySQLConnection conn
+  
   SelectProduct(MySQLConnection connection):
     this.conn = connection
     
@@ -24,24 +29,32 @@ class SelectProduct implements selectableProduct:
     QuerySet = this.conn.execute()
     return response
 
+// Hlavni trida, ve ktere je implementovan import
     
 class Process:
   int chunkSize
+  
   Process(insertableProduct insert, selectableProduct select, int chunkSize)
     this.insert = insert
     this.select = select
     this.chunkSize = chunkSize
+    
   Do():
     int tmpId = 0
     QuerySet tmpQuery = null;
-    do:
-      tmpQuery = this.select.Select(tmpId, this.chunkSize)
+    tmpQuery = this.select.Select(tmpId, this.chunkSize)
+    while(tmpQuery):
       foreach tmpQuery as row:
         this.insert.Insert(row['Product.id'], row['Product.name'])
         tmpId = row['Product.id']
+      tmpQuery = this.select.Select(tmpId, this.chunkSize)
+      
+// Zacatek ukazky pouziti
 
-         
-    
-    
+MySQLConnection connection = new MySQL("CONNECTION STRING")
+selectProduct select = new SelectProduct(connection)
+insertProduct insert = new InsertPorduct("RESTAPI URL")
+Process proc = new Process(insert, select, 50)
+proc.Do()
 
-    
+// Konec ukazky    
